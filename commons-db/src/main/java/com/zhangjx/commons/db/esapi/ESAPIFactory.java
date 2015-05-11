@@ -7,8 +7,12 @@ import com.zhangjx.commons.db.esapi.mysql.MysqlESAPI;
 import com.zhangjx.commons.db.esapi.mysql.MysqlESAPI.Mode;
 import com.zhangjx.commons.db.esapi.oracle.OracleESAPI;
 import com.zhangjx.commons.db.exception.NotSupportedDatabaseException;
+import com.zhangjx.commons.logging.Log;
+import com.zhangjx.commons.logging.LogFactory;
 
 public class ESAPIFactory {
+	
+	private static final Log log = LogFactory.getLog(ESAPIFactory.class);
 	
 	private ESAPIFactory() {
 		
@@ -18,15 +22,20 @@ public class ESAPIFactory {
 	
 	@SuppressWarnings("static-access")
 	public static ESAPI getESAPI(Database db) {
+		log.debug("Start to create ESAPI adaptee for Database[" + db.getDbName() + "]");
+		ESAPI esapi;
 		if(db.ORACLE.equals(db)) {
-			return getOracleESAPI();
+			esapi = getOracleESAPI();
 		} else if(db.MYSQL_STANDART.equals(db)) {
-			return getMysqlESAPI();
+			esapi = getMysqlESAPI();
 		} else if(db.MYSQL_ANSI.equals(db)) {
-			return getMysqlESAPI(db.getMode());
+			esapi = getMysqlESAPI(db.getMode());
 		} else {
+			log.error("Create ESAPI fail. The database[" + db.getDbName() + "] is not supported now.");
 			throw new NotSupportedDatabaseException("The database[" + db.getDbName() + "] is not supported now.");
 		}
+		log.debug("Finish to create ESAPI adaptee for Database[" + db.getDbName() + "] successfully");
+		return esapi;
 	}
 	
 	public static ESAPI getOracleESAPI() {
