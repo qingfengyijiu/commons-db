@@ -1,7 +1,9 @@
 package com.zhangjx.commons.db.pager;
 
+import com.zhangjx.commons.db.enumeration.Order;
+
 /**
- * 分页信息类
+ * Class for pager info.
  * @author zhang jianxin
  *
  */
@@ -11,23 +13,23 @@ public class Pager {
 	
 	private static final int DEFAULT_PAGE_SIZE = 10;
 	
-	private static final String DEFAULT_ORDER = "DESC";
+	private static final String DEFAULT_ORDER = Order.DESC.getName();
 	
 	private static final int DEFAULT_PAGE_TOTAL = 1;
 
-	// 当前页码从1开始
+	// current page number
 	private int currentPage = PAGE_START;
 	
-	//总记录数
+	// the count of all the records
 	private int recordsCount;
 	
-	// 每页记录数
+	// the records number in a page
 	private int pageSize = DEFAULT_PAGE_SIZE;
 	
-	// 排序字段
+	// sort column name
 	private String sortColumn;
 	
-	// 排序方式，默认DESC
+	// sort direction : DESC OR ASC
 	private String order = DEFAULT_ORDER;
 	
 	// 总页数，默认为1
