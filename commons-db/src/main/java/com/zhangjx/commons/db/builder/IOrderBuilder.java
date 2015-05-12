@@ -1,6 +1,6 @@
 package com.zhangjx.commons.db.builder;
 
-import com.zhangjx.commons.db.builder.sql.OrderBuilder.Order;
+import com.zhangjx.commons.db.enumeration.Order;
 import com.zhangjx.commons.db.esapi.ESAPI;
 
 public interface IOrderBuilder {

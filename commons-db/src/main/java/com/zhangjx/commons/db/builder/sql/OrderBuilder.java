@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.zhangjx.commons.db.builder.Constants;
 import com.zhangjx.commons.db.builder.IOrderBuilder;
+import com.zhangjx.commons.db.enumeration.Order;
 import com.zhangjx.commons.db.esapi.ESAPI;
 
 public class OrderBuilder implements Constants, IOrderBuilder {
@@ -94,23 +95,5 @@ public class OrderBuilder implements Constants, IOrderBuilder {
 		}
 		
 	}
-	
-	public enum Order {
-		
-		ASC("ASC"),
-		DESC("DESC");
-		
-		String name;
-		
-		Order(String name) {
-			this.name = name;
-		}
-		
-		String getName() {
-			return name;
-		}
-		
-	}
-	
 	
 }
