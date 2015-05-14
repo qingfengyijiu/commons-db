@@ -35,8 +35,8 @@ public abstract class AbstractBaseService<T extends BaseEntity, D extends BaseDa
 		return this.getDao().listByParam(params);
 	}
 
-	public List<T> listByParam(Map<String, Object> params, Pager pager) {
-		return this.getDao().listByParam(params, pager);
+	public List<T> pagerListByParam(Map<String, Object> params, Pager pager) {
+		return this.getDao().pagerListByParam(params, pager);
 	}
 
 	public void batchUpdate(Map<String, Object> params,

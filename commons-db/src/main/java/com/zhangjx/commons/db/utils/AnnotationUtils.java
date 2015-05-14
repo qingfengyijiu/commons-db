@@ -136,7 +136,7 @@ public class AnnotationUtils {
 		return null;
 	}
 	
-	public static <T extends BaseEntity> String getSetSql(Class<T> entityClass, T t) {
+	public static String getSetSql(Class<? extends BaseEntity> entityClass, BaseEntity t) {
 		StringBuilder sb = new StringBuilder();
 		Field[] fields = entityClass.getDeclaredFields();
 		for(Field field : fields) {

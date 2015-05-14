@@ -20,7 +20,7 @@ public interface BaseDao<T extends BaseEntity> {
 	
 	List<T> listByParam(Map<String, Object> params);
 	
-	List<T> listByParam(Map<String, Object> params, Pager pager);
+	List<T> pagerListByParam(Map<String, Object> params, Pager pager);
 	
 	void batchUpdate(Map<String, Object> params, Map<String, Object> updates);
 	
