@@ -16,8 +16,8 @@ import javax.persistence.Table;
 import org.apache.commons.lang.StringUtils;
 
 import com.zhangjx.commons.db.annotation.DynamicParameter;
-import com.zhangjx.commons.db.annotation.DynamicParameter.Operation;
 import com.zhangjx.commons.db.entity.BaseEntity;
+import com.zhangjx.commons.db.enumeration.Operation;
 
 public class AnnotationUtils {
 	

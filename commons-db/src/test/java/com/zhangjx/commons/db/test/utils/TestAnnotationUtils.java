@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.zhangjx.commons.db.utils.AnnotationUtils;
 
-public class AnnotationUtilsTest {
+public class TestAnnotationUtils {
 
 	@Test
 	public void testGetTableName() {
