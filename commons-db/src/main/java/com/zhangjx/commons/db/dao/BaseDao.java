@@ -12,8 +12,6 @@ public interface BaseDao<T extends BaseEntity> {
 	
 	void update(T t);
 	
-	void merge(T t);
-	
 	void delete(String id);
 	
 	T selectById(String id);

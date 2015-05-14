@@ -19,10 +19,6 @@ public abstract class AbstractBaseService<T extends BaseEntity, D extends BaseDa
 		this.getDao().update(t);
 	}
 
-	public void merge(T t) {
-		this.getDao().merge(t);
-	}
-
 	public void delete(String id) {
 		this.getDao().delete(id);
 	}
