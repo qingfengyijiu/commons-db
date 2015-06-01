@@ -10,16 +10,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.zhangjx.commons.db.annotation.DynamicParameter;
 import com.zhangjx.commons.db.entity.BaseEntity;
 import com.zhangjx.commons.db.enumeration.Operation;
+import com.zhangjx.commons.logging.Log;
+import com.zhangjx.commons.logging.LogFactory;
 
 public class AnnotationUtils {
+	
+	private static final Log log = LogFactory.getLog(AnnotationUtils.class);
 	
 	private static final String KEY_WHERE = "WHERE";
 	
@@ -140,6 +146,11 @@ public class AnnotationUtils {
 		StringBuilder sb = new StringBuilder();
 		Field[] fields = entityClass.getDeclaredFields();
 		for(Field field : fields) {
+			Transient trans = field.getAnnotation(Transient.class);
+			if(trans != null) {
+				// annotated with 'Transient', not persistent
+				continue;
+			}
 			Column column = field.getAnnotation(Column.class);
 			JoinColumn joinColumn = null;
 			if(column == null) {
@@ -152,7 +163,8 @@ public class AnnotationUtils {
 				try {
 					value = method.invoke(t, new Object[]{});
 				} catch (Exception e) {
-					System.out.println(e);
+					log.error("invoke" + entityClass.getClass().getName() + "#" + method.getName() + " failed");
+					log.error(e.getMessage(), e);
 					// ignore
 				} 
 				if(value != null) {
@@ -227,6 +239,22 @@ public class AnnotationUtils {
 		sql = StringUtils.trim(sql);
 		sql = sql.substring("AND".length(), sql.length());
 		return sql;
+	}
+	
+	public static String getIdColumnName(Class<? extends BaseEntity> entityClass) {
+		String idName = null;
+		Field[] fields = entityClass.getDeclaredFields();
+		for(Field field : fields) {
+			Id id = field.getAnnotation(Id.class);
+			if(id != null) {
+				idName = getColumnName(field);
+				break;
+			}
+		}
+		if(idName == null) {
+			idName = "ID";
+		}
+		return idName;
 	}
 	
 }

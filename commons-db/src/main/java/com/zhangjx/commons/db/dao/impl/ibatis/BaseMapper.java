@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 import com.zhangjx.commons.db.dao.BaseDao;
@@ -19,24 +18,21 @@ import com.zhangjx.commons.logging.Log;
 import com.zhangjx.commons.logging.LogFactory;
 
 import org.apache.ibatis.builder.SqlSourceBuilder;
-import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.reflection.MetaObject;
-import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
-import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
-import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 import org.apache.ibatis.session.Configuration;
 import org.mybatis.spring.SqlSessionTemplate;
 
+/**
+ * 该类是通用mapper的基类，实现了CURD操作。使用框架时，需要创建子类进行继承，子类命名推荐“Base + 业务名 + Mapper”，跟spring自动生成的mapper实现类区分开
+ * @author zhang jianxin
+ *
+ * @param <T>
+ */
 public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 	
 	private Log log = LogFactory.getLog(BaseMapper.class);
-	
-	private static final ObjectFactory DEFAULT_OBJECT_FACTORY = new DefaultObjectFactory();
-    private static final ObjectWrapperFactory DEFAULT_OBJECT_WRAPPER_FACTORY = new DefaultObjectWrapperFactory();
 	
 	private SqlSessionTemplate sqlSessionTemplate;
 	
@@ -51,6 +47,8 @@ public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 		try {
 			this.entityClass = (Class<? extends BaseEntity>) Resources.classForName(className);
 		} catch (ClassNotFoundException e) {
+			log.error("Class " + className + " load failed");
+			throw new RuntimeException("Class " + className + " load failed");
 		}
 	}
 	
@@ -82,7 +80,11 @@ public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 		return AnnotationUtils.getSetSql(entityClass, t);
 	}
 	
-	protected String getInserSql(T t) {
+	protected String getIdColumnName() {
+		return AnnotationUtils.getIdColumnName(entityClass);
+	}
+	
+	protected String getInsertSql(T t) {
 		String tableName = this.getTableName();
 		String setSql = this.getSetSql(t);
 		StringBuilder sb = new StringBuilder();
@@ -101,7 +103,9 @@ public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 		sb.append(tableName);
 		sb.append(" ");
 		sb.append(setSql);
-		sb.append("WHERE ID = '");
+		sb.append("WHERE ");
+		sb.append(this.getIdColumnName());
+		sb.append(" = '");
 		sb.append(esapi(t.getId()));
 		sb.append("'");
 		return sb.toString();
@@ -112,7 +116,9 @@ public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 		StringBuilder sb = new StringBuilder();
 		sb.append("DELETE FROM ");
 		sb.append(tableName);
-		sb.append(" WHERE ID = '");
+		sb.append("WHERE ");
+		sb.append(this.getIdColumnName());
+		sb.append(" = '");
 		sb.append(esapi(id));
 		sb.append("'");
 		return sb.toString();
@@ -176,7 +182,7 @@ public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 	}
 	
 	protected MappedStatement getMappedStatemnt(String id, String sql, SqlCommandType sqlCommandType, Pager pager) {
-		String prefix = this.entityClass.getName() + ".";
+		String prefix = this.entityClass.getName() + ".base";
 		if(id.startsWith(prefix)) {
 			id = prefix + id;
 		}
@@ -188,97 +194,47 @@ public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 			mappedStatement = builder.build();;
 			configuration.addMappedStatement(mappedStatement);
 		}
-		if(pager != null) {
-			// 设置总记录数、总页数信息
-			Connection connection = this.sqlSessionTemplate.getConnection();
-			this.SetPagerTotalInfo(sql, connection, mappedStatement, pager);
-			// 重写SQL
-			MetaObject metaStatementHandler = MetaObject.forObject(statementHandler, DEFAULT_OBJECT_FACTORY,
-    				DEFAULT_OBJECT_WRAPPER_FACTORY);
-		}
 		return mappedStatement;
 	}
 	
 	public void insert(T t) {
-		String id = "insert";
-		String sql = this.getInserSql(t);
+		String id = "Insert";
+		String sql = this.getInsertSql(t);
 		SqlCommandType sqlCommandType = SqlCommandType.INSERT;
 		MappedStatement mappedStatemnt = this.getMappedStatemnt(id, sql, sqlCommandType);
 		this.sqlSessionTemplate.insert(mappedStatemnt.getId());
 	}
 
 	public void update(T t) {
-		String mapId = "update";
+		String mapId = "Update";
 		String sql = this.getUpdateSql(t);
 		SqlCommandType sqlCommandType = SqlCommandType.UPDATE;
 		MappedStatement mappedStatemnt = this.getMappedStatemnt(mapId, sql, sqlCommandType);
 		this.sqlSessionTemplate.update(mappedStatemnt.getId());
 	}
 
-	public void delete(String id) {
-		String mapId = "delete";
-		String sql = this.getDeleteSql(id);
+
+	public void delete(T t) {
+		String mapId = "Delete";
+		String sql = this.getDeleteSql(t.getId());
 		SqlCommandType sqlCommandType = SqlCommandType.DELETE;
 		MappedStatement mappedStatemnt = this.getMappedStatemnt(mapId, sql, sqlCommandType);
 		this.sqlSessionTemplate.delete(mappedStatemnt.getId());
 	}
 
-	public T selectById(String id) {
-		String mapId = "selectById";
+	public T find(T t) {
+		String mapId = "Find";
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getBaseQuery());
-		sb.append(" WHERE ID = '");
-		sb.append(esapi(id));
+		sb.append("WHERE ");
+		sb.append(this.getIdColumnName());
+		sb.append(" = '");
+		sb.append(esapi(t.getId()));
 		sb.append("'");
 		String sql = sb.toString();
 		SqlCommandType sqlCommandType = SqlCommandType.SELECT;
 		MappedStatement mappedStatemnt = this.getMappedStatemnt(mapId, sql, sqlCommandType);
 		return this.sqlSessionTemplate.selectOne(mappedStatemnt.getId());
-	}
-
-	public T selectByParam(Map<String, Object> params) {
-		String mapId = "selectByParam";
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.getBaseQuery());
-		sb.append(this.getParamSql(params));
-		String sql = sb.toString();
-		SqlCommandType sqlCommandType = SqlCommandType.SELECT;
-		MappedStatement mappedStatemnt = this.getMappedStatemnt(mapId, sql, sqlCommandType);
-		return this.sqlSessionTemplate.selectOne(mappedStatemnt.getId());
-	}
-
-	public List<T> listByParam(Map<String, Object> params) {
-		String mapId = "listByParam";
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.getBaseQuery());
-		sb.append(this.getParamSql(params));
-		String sql = sb.toString();
-		SqlCommandType sqlCommandType = SqlCommandType.SELECT;
-		MappedStatement mappedStatemnt = this.getMappedStatemnt(mapId, sql, sqlCommandType);
-		return this.sqlSessionTemplate.selectList(mappedStatemnt.getId());
-	}
-
-	public List<T> pagerListByParam(Map<String, Object> params, Pager pager) {
-		String mapId = "pagerListByParam";
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.getBaseQuery());
-		sb.append(this.getParamSql(params));
-		String sql = sb.toString();
-		SqlCommandType sqlCommandType = SqlCommandType.SELECT;
-		MappedStatement mappedStatemnt = this.getMappedStatemnt(mapId, sql, sqlCommandType);
-		mappedStatement.
-		return this.sqlSessionTemplate.selectList(mappedStatemnt.getId());
-	}
-
-	public void batchUpdate(Map<String, Object> params,
-			Map<String, Object> updates) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void batchDelete(Map<String, Object> params) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
