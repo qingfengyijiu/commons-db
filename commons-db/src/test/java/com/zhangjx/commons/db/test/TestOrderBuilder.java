@@ -4,10 +4,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.zhangjx.commons.db.builder.sql.OrderBuilder;
+import com.zhangjx.commons.db.enumeration.Database;
 import com.zhangjx.commons.db.enumeration.Order;
 import com.zhangjx.commons.db.esapi.ESAPI;
 import com.zhangjx.commons.db.esapi.ESAPIFactory;
-import com.zhangjx.commons.db.esapi.ESAPIFactory.Database;
 
 public class TestOrderBuilder {
 
