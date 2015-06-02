@@ -25,7 +25,7 @@ import org.apache.ibatis.session.Configuration;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
- * 该类是通用mapper的基类，实现了CURD操作。使用框架时，需要创建子类进行继承，子类命名推荐“Base + 业务名 + Mapper”，跟spring自动生成的mapper实现类区分开
+ * base mapper for other business model mapper with CURD functions
  * @author zhang jianxin
  *
  * @param <T>
@@ -143,7 +143,7 @@ public class BaseMapper<T extends BaseEntity> implements BaseDao<T> {
 	}
 	
 	protected void SetPagerTotalInfo(String sql, Connection connection, MappedStatement mappedStatement, Pager pager) {
-		 // 记录总记录数
+		 // 锟斤拷录锟杰硷拷录锟斤拷
     	if(pager == null) return;
         String countSql = "select count(0) from (" + sql + ")";
         PreparedStatement countStmt = null;

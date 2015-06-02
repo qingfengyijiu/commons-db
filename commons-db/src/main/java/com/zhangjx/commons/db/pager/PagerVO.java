@@ -3,7 +3,7 @@ package com.zhangjx.commons.db.pager;
 import java.util.List;
 
 /**
- * 包装分页信息和分页查询结果的包装类
+ * the wrapper for pager query result
  * @author zhang jianxin
  *
  * @param <T>

@@ -1,7 +1,6 @@
 package com.zhangjx.commons.db.interceptor.ibatis;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
